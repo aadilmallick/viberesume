@@ -1,26 +1,10 @@
 import { neon } from "@neondatabase/serverless";
-
+import { User, Website } from "@/lib/types";
 const db_url = process.env.DATABASE_URL;
 if (!db_url) {
   throw new Error("DATABASE_URL environment variable is not set");
 }
 const sql = neon(db_url);
-
-export type User = {
-  id: number;
-  clerk_id: string;
-  email: string;
-  created_at: string;
-};
-
-export type Website = {
-  id: number;
-  user_id: number;
-  slug: string;
-  code: string;
-  created_at: string;
-  updated_at: string;
-};
 
 class CloudDatabase {
   /* ---------- Tables ---------- */
@@ -68,6 +52,24 @@ class CloudDatabase {
       RETURNING *
     `;
     return result[0] as User;
+  }
+
+  static async getOrCreateUser({
+    clerk_id,
+    email,
+  }: {
+    clerk_id: string;
+    email: string;
+  }): Promise<User> {
+    // Try to get existing user first
+    let user = await this.getUserByClerkId(clerk_id);
+
+    if (!user) {
+      // Create user if doesn't exist
+      user = await this.addUser({ clerk_id, email });
+    }
+
+    return user;
   }
 
   /* ---------- Websites ---------- */

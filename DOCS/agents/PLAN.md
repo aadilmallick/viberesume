@@ -8,6 +8,15 @@ This file describes the high-level roadmap for building the Resume → Portfolio
 
 This is vibe-resume: a nextJS app that lets logged in users upload their resume in PDF format, after which we'll extract the text from the pdf, hand it off to the AI to create a single-page, nicely designed portfolio (which is just an HTML + Tailwind + inline JS string stored in DB) hosted on our server under a randomly-initialized slug, like viberesume.com/jhfadj-3434-sfs, and then users can then change that slug to a unique, more semantic slug like 'natalie-portfolio'.
 
+**working with the tech stack**
+
+1. Use TailwindCSS and have nice design throughout
+2. Keep any progress you made in a PROGRESS.md, list objectives there as todos and then strike them out as you go.
+3. Use zod for type safety, especially in API routes, keep common types and interfaces
+4. Use ShadCN
+
+**user stories**
+
 Here are the user stories:
 
 - **create sites**: users can upload resumes on the dashboard, which gets fed to LLM call which produces valid HTML + Tailwind string, and then that gets stored in DB as a `website` record, storing a random slug and the code string connecting to specific user who generated the site via foreign key.
@@ -62,7 +71,24 @@ CREATE TABLE IF NOT EXISTS websites (
 
 ---
 
-## 4. AI Integration
+## 4. Dashboard
+
+- Route: `/dashboard`
+- Features:
+
+  - List all sites owned by the logged-in user.
+  - Show link to each site (`/slug`).
+  - user can log out
+  - Buttons:
+
+    - **Rename slug** (PATCH `/api/websites/[slug]`).
+    - **Delete site** (DELETE `/api/websites/[id]`).
+
+- Use Clerk session to look up `user_id`.
+
+---
+
+## 5. AI Integration
 
 - System prompt to AI will explain the DB schema so it understands what to generate/store:
 
@@ -85,22 +111,6 @@ The HTML string will be stored in the "websites.code" column of a Postgres table
   3. Send text + system prompt to AI.
   4. Receive HTML string.
   5. Insert into `websites` table with random slug.
-
----
-
-## 5. Dashboard
-
-- Route: `/dashboard`
-- Features:
-
-  - List all sites owned by the logged-in user.
-  - Show link to each site (`/slug`).
-  - Buttons:
-
-    - **Rename slug** (PATCH `/api/websites/[slug]`).
-    - **Delete site** (DELETE `/api/websites/[id]`).
-
-- Use Clerk session to look up `user_id`.
 
 ---
 
