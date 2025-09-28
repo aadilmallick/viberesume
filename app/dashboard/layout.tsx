@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DashboardSidebar } from "./components/DashboardSidebar";
+import { DashboardHeader } from "./components/DashboardHeader";
 
 export default function DashboardLayout({
   children,
@@ -23,7 +24,13 @@ export default function DashboardLayout({
         <DashboardSidebar />
 
         {/* Main content */}
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 flex flex-col md:ml-0">
+          {/* Mobile header with hamburger */}
+          <DashboardHeader />
+          
+          {/* Page content */}
+          <main className="flex-1">{children}</main>
+        </div>
       </div>
     </div>
   );

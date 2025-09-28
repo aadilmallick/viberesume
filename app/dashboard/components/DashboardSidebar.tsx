@@ -26,17 +26,16 @@ export const DashboardSidebar = () => {
     );
   };
 
-  // if (isOpen) {
-  //   return (
-  // <div
-  //   className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-  //   onClick={closeSidebar}
-  // />
-  //   );
-  // }
   return (
-    <div className="w-64 min-h-screen bg-white border-r border-slate-200 shadow-sm relative">
+    <>
       <MobileOverlay />
+      <div 
+        className={`
+          fixed md:relative w-64 h-screen bg-white border-r border-slate-200 shadow-sm z-50
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}
+      >
       <div className="p-6">
         {/* Logo */}
         <div className="flex items-center space-x-2 mb-8">
@@ -101,5 +100,6 @@ export const DashboardSidebar = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
