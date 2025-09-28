@@ -36,6 +36,7 @@ import {
   Wand2,
   X,
   Check,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { Website } from "@/lib/types";
@@ -102,6 +103,31 @@ export function PortfolioCard({
       toast("Portfolio URL copied to clipboard!");
     } catch (error) {
       console.error("Failed to copy:", error);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Check out this portfolio: ${title}`,
+          text: `I created this portfolio with VibeResume, you can check it out here: ${fullUrl}`,
+          url: fullUrl,
+        });
+        toast("Portfolio shared successfully!");
+      } else {
+        toast("Web Share API is not supported in your browser.", {
+          icon: <X className="w-4 h-4" />,
+        });
+      }
+    } catch (error) {
+      // Handle cases where the user cancels the share dialog
+      if ((error as Error).name !== "AbortError") {
+        console.error("Failed to share:", error);
+        toast("Failed to share portfolio", {
+          icon: <X className="w-4 h-4" />,
+        });
+      }
     }
   };
 
@@ -256,6 +282,14 @@ export function PortfolioCard({
             title="Copy portfolio URL"
           >
             <Copy className="w-4 h-4" />
+          </ToolTipButton>
+
+          <ToolTipButton
+            onClick={handleShare}
+            className="flex-shrink-0"
+            title="Share portfolio"
+          >
+            <Share2 className="w-4 h-4" />
           </ToolTipButton>
 
           {/* AI Edit Dialog */}
