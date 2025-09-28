@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -89,19 +90,25 @@ export default function Home() {
             <CardContent className="relative overflow-hidden">
               <div className="relative isolate mt-6 grid gap-6 rounded-xl bg-gradient-to-br from-white to-white/80 p-6 shadow-[inset_6px_6px_18px_rgba(0,0,0,0.06),_inset_-6px_-6px_18px_rgba(255,255,255,0.8)] dark:from-neutral-900 dark:to-neutral-900/80 dark:shadow-[inset_6px_6px_18px_rgba(0,0,0,0.35),_inset_-6px_-6px_18px_rgba(255,255,255,0.05)] md:grid-cols-2">
                 <div className="space-y-3">
-                  <div className="h-6 w-40 rounded-md bg-secondary animate-[pulse_3s_ease-in-out_infinite]" />
+                  <div className="h-6 w-40 rounded-md bg-secondary animate-pulse" />
                   <div className="h-4 w-64 rounded-md bg-secondary/80" />
-                  <div className="h-4 w-56 rounded-md bg-secondary/70" />
+                  <div className="h-4 w-56 rounded-md bg-secondary/70 animate-pulse" />
                   <div className="mt-4 h-3 w-full rounded-md bg-secondary/60" />
-                  <div className="h-3 w-[90%] rounded-md bg-secondary/60" />
-                  <div className="h-3 w-[75%] rounded-md bg-secondary/60" />
+                  <div className="h-3 w-[90%] rounded-md bg-secondary/60 animate-pulse" />
+                  <div className="h-3 w-[75%] rounded-md bg-secondary/60 animate-pulse" />
                 </div>
                 <div className="relative">
                   <div className="absolute -left-6 -top-6 h-24 w-24 rounded-full bg-[radial-gradient(ellipse_at_center,oklch(0.92_0.05_260)_0%,transparent_70%)] blur-xl" />
                   <div className="aspect-video w-full overflow-hidden rounded-lg border bg-background shadow-[0_10px_30px_rgba(0,0,0,0.12)]">
-                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                      Portfolio preview
-                    </div>
+                    <Image
+                      src="/images/viberesumeexample.jpg"
+                      alt="Portfolio preview example"
+                      fill
+                      className="object-cover object-top rounded-lg hover:scale-105 transition-transform duration-150"
+                      priority
+                      // height={1324}
+                      // width={916}
+                    />
                   </div>
                 </div>
               </div>
@@ -119,7 +126,7 @@ export default function Home() {
           {[
             {
               title: "Upload your resume",
-              desc: "PDF or DOCX — we extract the essentials with care.",
+              desc: "AI will extract the essentials from your resume, crafting a beautiful portfolio just for you.",
             },
             {
               title: "AI crafts your site",

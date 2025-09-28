@@ -285,7 +285,7 @@ export function PortfolioCard({
                       setModificationRequest(e.target.value)
                     }
                     placeholder="e.g., Add a professional headshot image to the hero section..."
-                    className="mt-1 min-h-[100px]"
+                    className="mt-1 min-h-[100px] max-w-full break-all"
                   />
                   <p className="text-xs text-slate-500 mt-1">
                     Be specific about what you want to change or add
