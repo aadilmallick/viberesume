@@ -12,7 +12,7 @@ export default function DashboardLayout({
   const { isOpen, toggleSidebar } = useSidebarStore();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <DashboardSidebar />
       <div className="md:pl-64">
         <header className="md:hidden sticky top-0 bg-white/80 backdrop-blur-sm z-30 shadow-sm flex items-center justify-between p-4 border-b">
