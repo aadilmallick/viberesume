@@ -49,9 +49,8 @@ export async function POST(request: NextRequest) {
       pdfFile.type
     );
 
-    // Generate unique slug
-    // const slug = nanoid(10); // Generates a 10-character random string
-    const slug = crypto.randomUUID();
+    // Generate unique slug (first 15 chars of UUID)
+    const slug = crypto.randomUUID().substring(0, 15);
 
     // Save website to database
     const website = await CloudDatabase.addWebsite({

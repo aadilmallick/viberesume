@@ -6,7 +6,7 @@ import { editCodeSummary } from "@/dal/ai";
 // DELETE /api/websites/[id] - Delete a website
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication
@@ -15,7 +15,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const websiteId = parseInt(params.id);
+    const { id } = await params;
+    const websiteId = parseInt(id);
     if (isNaN(websiteId)) {
       return NextResponse.json(
         { error: "Invalid website ID" },
@@ -88,7 +89,10 @@ export async function PATCH(
     const slugRegex = /^[a-zA-Z0-9-_]+$/;
     if (!slugRegex.test(slug)) {
       return NextResponse.json(
-        { error: "Slug can only contain letters, numbers, hyphens, and underscores" },
+        {
+          error:
+            "Slug can only contain letters, numbers, hyphens, and underscores",
+        },
         { status: 400 }
       );
     }
@@ -120,7 +124,10 @@ export async function PATCH(
     }
 
     // Update the slug
-    const updatedWebsite = await CloudDatabase.updateWebsiteSlug(websiteId, slug);
+    const updatedWebsite = await CloudDatabase.updateWebsiteSlug(
+      websiteId,
+      slug
+    );
 
     return NextResponse.json({
       success: true,
@@ -142,7 +149,7 @@ export async function PATCH(
 // PUT /api/websites/[id]/edit - Edit website content with AI
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication
@@ -150,8 +157,9 @@ export async function PUT(
     if (!clerkId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const { id } = await params;
 
-    const websiteId = parseInt(params.id);
+    const websiteId = parseInt(id);
     if (isNaN(websiteId)) {
       return NextResponse.json(
         { error: "Invalid website ID" },

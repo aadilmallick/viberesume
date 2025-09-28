@@ -3,7 +3,8 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Upload, FileText, X, Loader2 } from "lucide-react";
+import { Upload, FileText, X, Loader2, FileWarning } from "lucide-react";
+import { toast } from "sonner";
 
 interface UploadResumeProps {}
 
@@ -16,7 +17,9 @@ export default function UploadResume({}: UploadResumeProps) {
     if (selectedFile.type === "application/pdf") {
       setFile(selectedFile);
     } else {
-      alert("Please select a PDF file");
+      toast("Please select a PDF file", {
+        icon: <FileWarning className="w-4 h-4" />,
+      });
     }
   };
 
@@ -60,14 +63,16 @@ export default function UploadResume({}: UploadResumeProps) {
 
       if (data.success) {
         // Redirect to the generated portfolio or dashboard
-        alert(`Portfolio generated successfully! Visit: ${data.website.url}`);
+        toast(`Portfolio generated successfully! Visit: ${data.website.url}`);
         window.location.reload();
       } else {
         throw new Error(data.error || "Failed to generate portfolio");
       }
     } catch (error) {
       console.error("Error generating portfolio:", error);
-      alert("Failed to generate portfolio. Please try again.");
+      toast("Failed to generate portfolio. Please try again.", {
+        icon: <X className="w-4 h-4" />,
+      });
     } finally {
       setIsGenerating(false);
     }

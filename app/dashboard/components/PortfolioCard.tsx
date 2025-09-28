@@ -11,6 +11,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 // import {
 //   AlertDialog,
 //   AlertDialogAction,
@@ -29,11 +34,46 @@ import {
   Calendar,
   Edit,
   Wand2,
+  X,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import { Website } from "@/lib/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+function ToolTipButton({
+  children,
+  title,
+  onClick,
+  className,
+  disabled,
+}: {
+  children: React.ReactNode;
+  title: string;
+  onClick?: () => void;
+  className?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={className}
+          title={title}
+          onClick={onClick}
+          disabled={disabled}
+        >
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{title}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function PortfolioCard({
   website,
@@ -47,6 +87,7 @@ export function PortfolioCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [aiEditDialogOpen, setAiEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [modificationRequest, setModificationRequest] = useState("");
   const [isModifying, setIsModifying] = useState(false);
 
@@ -58,7 +99,7 @@ export function PortfolioCard({
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(fullUrl);
-      alert("Portfolio URL copied to clipboard!");
+      toast("Portfolio URL copied to clipboard!");
     } catch (error) {
       console.error("Failed to copy:", error);
     }
@@ -80,16 +121,26 @@ export function PortfolioCard({
         throw new Error(error.error || "Failed to update slug");
       }
 
-      alert("Portfolio URL updated successfully!");
+      toast("Portfolio URL updated successfully!", {
+        description: `New URL: ${fullUrl}`,
+        action: {
+          label: "View",
+          onClick: () => {
+            window.open(fullUrl, "_blank");
+          },
+        },
+      });
       setEditDialogOpen(false);
       onUpdate?.();
     } catch (error) {
       console.error("Update error:", error);
-      alert(
+      const errorMessage =
         error instanceof Error
           ? error.message
-          : "Failed to update portfolio URL"
-      );
+          : "Failed to update portfolio URL";
+      toast(errorMessage, {
+        icon: <X className="w-4 h-4" />,
+      });
     } finally {
       setIsUpdating(false);
     }
@@ -106,11 +157,16 @@ export function PortfolioCard({
         throw new Error("Failed to delete portfolio");
       }
 
-      alert("Portfolio deleted successfully!");
+      toast("Portfolio deleted successfully!", {
+        icon: <Check className="w-4 h-4" />,
+      });
+      setDeleteDialogOpen(false);
       onUpdate?.();
     } catch (error) {
       console.error("Delete error:", error);
-      alert("Failed to delete portfolio");
+      toast("Failed to delete portfolio", {
+        icon: <X className="w-4 h-4" />,
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -134,15 +190,19 @@ export function PortfolioCard({
         throw new Error(error.error || "Failed to modify portfolio");
       }
 
-      alert("Portfolio modified successfully!");
+      toast("Portfolio modified successfully!", {
+        icon: <Check className="w-4 h-4" />,
+      });
       setAiEditDialogOpen(false);
       setModificationRequest("");
       onUpdate?.();
     } catch (error) {
       console.error("Modification error:", error);
-      alert(
-        error instanceof Error ? error.message : "Failed to modify portfolio"
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to modify portfolio";
+      toast(errorMessage, {
+        icon: <X className="w-4 h-4" />,
+      });
     } finally {
       setIsModifying(false);
     }
@@ -190,21 +250,20 @@ export function PortfolioCard({
             </Button>
           </Link>
 
-          <Button
-            variant="outline"
-            size="sm"
+          <ToolTipButton
             onClick={copyToClipboard}
             className="flex-shrink-0"
+            title="Copy portfolio URL"
           >
             <Copy className="w-4 h-4" />
-          </Button>
+          </ToolTipButton>
 
           {/* AI Edit Dialog */}
           <Dialog open={aiEditDialogOpen} onOpenChange={setAiEditDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-shrink-0">
+              <ToolTipButton className="flex-shrink-0" title="Edit with AI">
                 <Wand2 className="w-4 h-4" />
-              </Button>
+              </ToolTipButton>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
@@ -233,8 +292,8 @@ export function PortfolioCard({
                   </p>
                 </div>
                 <div className="flex gap-2 justify-end">
-                  <Button
-                    variant="outline"
+                  <ToolTipButton
+                    title="Cancel"
                     onClick={() => {
                       setAiEditDialogOpen(false);
                       setModificationRequest("");
@@ -242,13 +301,15 @@ export function PortfolioCard({
                     disabled={isModifying}
                   >
                     Cancel
-                  </Button>
-                  <Button
+                  </ToolTipButton>
+                  <ToolTipButton
+                    title="Apply Changes"
+                    // className="flex-shrink-0"
                     onClick={handleAiModification}
                     disabled={isModifying || !modificationRequest.trim()}
                   >
                     {isModifying ? "Modifying..." : "Apply Changes"}
-                  </Button>
+                  </ToolTipButton>
                 </div>
               </div>
             </DialogContent>
@@ -257,9 +318,9 @@ export function PortfolioCard({
           {/* Edit Slug Dialog */}
           <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-shrink-0">
+              <ToolTipButton className="flex-shrink-0" title="Edit URL slug">
                 <Edit className="w-4 h-4" />
-              </Button>
+              </ToolTipButton>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -290,13 +351,13 @@ export function PortfolioCard({
                   </p>
                 </div>
                 <div className="flex gap-2 justify-end">
-                  <Button
-                    variant="outline"
+                  <ToolTipButton
+                    title="Cancel"
                     onClick={() => setEditDialogOpen(false)}
                     disabled={isUpdating}
                   >
                     Cancel
-                  </Button>
+                  </ToolTipButton>
                   <Button onClick={handleUpdateSlug} disabled={isUpdating}>
                     {isUpdating ? "Updating..." : "Update"}
                   </Button>
@@ -306,16 +367,15 @@ export function PortfolioCard({
           </Dialog>
 
           {/* Delete Alert Dialog */}
-          <Dialog>
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
             <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
+              <ToolTipButton
                 className="flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                 disabled={isDeleting}
+                title="Delete portfolio"
               >
                 <Trash2 className="w-4 h-4" />
-              </Button>
+              </ToolTipButton>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -327,8 +387,9 @@ export function PortfolioCard({
               </DialogHeader>
               <div className="flex gap-2 justify-end">
                 <Button
+                  variant="outline"
                   disabled={isDeleting}
-                  onClick={() => setEditDialogOpen(false)}
+                  onClick={() => setDeleteDialogOpen(false)}
                   className={cn(isDeleting && "opacity-50 cursor-not-allowed")}
                 >
                   Cancel
@@ -336,7 +397,7 @@ export function PortfolioCard({
                 <Button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-red-600 hover:bg-red-700 text-white"
                 >
                   {isDeleting ? "Deleting..." : "Delete"}
                 </Button>
