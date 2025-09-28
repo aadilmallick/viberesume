@@ -2,6 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +22,14 @@ import {
 //   AlertDialogTitle,
 //   AlertDialogTrigger,
 // } from "@/components/ui/alert-dialog";
-import { ExternalLink, Copy, Trash2, Calendar, Edit } from "lucide-react";
+import {
+  ExternalLink,
+  Copy,
+  Trash2,
+  Calendar,
+  Edit,
+  Wand2,
+} from "lucide-react";
 import Link from "next/link";
 import { Website } from "@/lib/types";
 import { useState } from "react";
@@ -38,6 +46,9 @@ export function PortfolioCard({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [aiEditDialogOpen, setAiEditDialogOpen] = useState(false);
+  const [modificationRequest, setModificationRequest] = useState("");
+  const [isModifying, setIsModifying] = useState(false);
 
   const portfolioUrl = `/sites/${website.slug}`;
   const fullUrl = `${
@@ -105,6 +116,38 @@ export function PortfolioCard({
     }
   };
 
+  const handleAiModification = async () => {
+    if (!modificationRequest.trim()) return;
+
+    setIsModifying(true);
+    try {
+      const response = await fetch(`/api/websites/${website.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          modificationRequest: modificationRequest.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to modify portfolio");
+      }
+
+      alert("Portfolio modified successfully!");
+      setAiEditDialogOpen(false);
+      setModificationRequest("");
+      onUpdate?.();
+    } catch (error) {
+      console.error("Modification error:", error);
+      alert(
+        error instanceof Error ? error.message : "Failed to modify portfolio"
+      );
+    } finally {
+      setIsModifying(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -139,7 +182,7 @@ export function PortfolioCard({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 justify-center">
           <Link href={portfolioUrl} target="_blank" className="flex-1">
             <Button variant="outline" size="sm" className="w-full">
               <ExternalLink className="w-4 h-4 mr-2" />
@@ -155,6 +198,61 @@ export function PortfolioCard({
           >
             <Copy className="w-4 h-4" />
           </Button>
+
+          {/* AI Edit Dialog */}
+          <Dialog open={aiEditDialogOpen} onOpenChange={setAiEditDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="flex-shrink-0">
+                <Wand2 className="w-4 h-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>AI Portfolio Editor</DialogTitle>
+                <DialogDescription>
+                  Describe what you'd like to change about your portfolio. For
+                  example: "Add a profile photo", "Change the color scheme to
+                  green", or "Update my contact email".
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    Modification Request
+                  </label>
+                  <Textarea
+                    value={modificationRequest}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setModificationRequest(e.target.value)
+                    }
+                    placeholder="e.g., Add a professional headshot image to the hero section..."
+                    className="mt-1 min-h-[100px]"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    Be specific about what you want to change or add
+                  </p>
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setAiEditDialogOpen(false);
+                      setModificationRequest("");
+                    }}
+                    disabled={isModifying}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAiModification}
+                    disabled={isModifying || !modificationRequest.trim()}
+                  >
+                    {isModifying ? "Modifying..." : "Apply Changes"}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Edit Slug Dialog */}
           <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>

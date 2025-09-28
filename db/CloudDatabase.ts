@@ -32,6 +32,26 @@ class CloudDatabase {
     `;
   }
 
+  static async updateWebsiteCodeByID(id: number, code: string) {
+    const result = await sql`
+      UPDATE websites
+      SET code = ${code}, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ${id}
+      RETURNING *
+    `;
+    return result[0] as Website;
+  }
+
+  static async updateWebsiteCodeBySlug(slug: string, code: string) {
+    const result = await sql`
+      UPDATE websites
+      SET code = ${code}, updated_at = CURRENT_TIMESTAMP
+      WHERE slug = ${slug}
+      RETURNING *
+    `;
+    return result[0] as Website;
+  }
+
   /* ---------- Users ---------- */
   static async getUserByClerkId(clerkId: string): Promise<User | null> {
     const result = await sql`SELECT * FROM users WHERE clerk_id = ${clerkId}`;

@@ -96,7 +96,7 @@ export async function PortfoliosList() {
     }
 
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
         {websites.map((website) => (
           <PortfolioCard key={website.id} website={website} />
         ))}

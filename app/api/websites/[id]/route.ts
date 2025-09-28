@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { CloudDatabase } from "@/db/CloudDatabase";
+import { editCodeSummary } from "@/dal/ai";
 
 // DELETE /api/websites/[id] - Delete a website
 export async function DELETE(
@@ -133,6 +134,84 @@ export async function PATCH(
     console.error("Website update error:", error);
     return NextResponse.json(
       { error: "Failed to update website" },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT /api/websites/[id]/edit - Edit website content with AI
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Check authentication
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const websiteId = parseInt(params.id);
+    if (isNaN(websiteId)) {
+      return NextResponse.json(
+        { error: "Invalid website ID" },
+        { status: 400 }
+      );
+    }
+
+    // Parse request body
+    const body = await request.json();
+    const { modificationRequest } = body;
+
+    if (!modificationRequest || typeof modificationRequest !== "string") {
+      return NextResponse.json(
+        { error: "Valid modification request is required" },
+        { status: 400 }
+      );
+    }
+
+    // Get user from database
+    const user = await CloudDatabase.getUserByClerkId(clerkId);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Verify website exists and belongs to user
+    const websites = await CloudDatabase.getWebsitesByUserId(user.id);
+    const website = websites.find((w) => w.id === websiteId);
+
+    if (!website) {
+      return NextResponse.json(
+        { error: "Website not found or unauthorized" },
+        { status: 404 }
+      );
+    }
+
+    // Use AI to modify the portfolio
+    const modificationResult = await editCodeSummary(
+      website.code,
+      modificationRequest
+    );
+
+    // Update the website with the modified code
+    const updatedWebsite = await CloudDatabase.updateWebsiteCodeByID(
+      websiteId,
+      modificationResult.htmlCode
+    );
+
+    return NextResponse.json({
+      success: true,
+      website: {
+        id: updatedWebsite.id,
+        slug: updatedWebsite.slug,
+        title: modificationResult.title,
+        updated_at: updatedWebsite.updated_at,
+      },
+    });
+  } catch (error) {
+    console.error("Website modification error:", error);
+    return NextResponse.json(
+      { error: "Failed to modify website" },
       { status: 500 }
     );
   }
