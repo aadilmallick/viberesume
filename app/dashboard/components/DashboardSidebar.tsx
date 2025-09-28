@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 import { UserButton, SignOutButton } from "@clerk/nextjs";
 import { Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,12 +40,12 @@ export const DashboardSidebar = () => {
       <MobileOverlay />
       <div className="p-6">
         {/* Logo */}
-        <div className="flex items-center space-x-2 mb-8">
+        <Link href="/" className="flex items-center space-x-2 mb-8">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">VR</span>
           </div>
           <h1 className="text-xl font-bold text-slate-800">VibeResume</h1>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav className="space-y-2">
