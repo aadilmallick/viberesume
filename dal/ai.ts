@@ -14,12 +14,12 @@ REQUIREMENTS:
 2. Create a modern, professional, and visually appealing design
 3. Include sections that the user included in their resume like: Header/Hero, About, Experience, Skills, Education, Projects (if mentioned), Contact
 4. Use a cohesive color scheme (preferably blue/purple gradient theme to match the VibeResume brand)
-5. Make it fully responsive for mobile and desktop
+5. Make it fully responsive for mobile and desktop, make it mobile-friendly by using tailwind's breakpoints
 6. Add subtle animations and hover effects using Tailwind
 7. Include professional typography and proper spacing
 8. Extract and organize all information from the resume intelligently
 9. If contact information is available, make email/phone clickable
-10. Add a professional headshot placeholder if no photo is provided
+10. Add a professional headshot placeholder if no photo is provided, like an avatar of the initials
 
 OUTPUT FORMAT:
 Return ONLY the complete HTML code as a single string. Do not include any explanations, markdown formatting, or code blocks. The HTML should be ready to render directly.

@@ -35,6 +35,7 @@ import {
   Edit,
   Wand2,
   X,
+  Share2,
   Check,
 } from "lucide-react";
 import Link from "next/link";
@@ -42,6 +43,7 @@ import { Website } from "@/lib/types";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 function ToolTipButton({
   children,
@@ -90,11 +92,14 @@ export function PortfolioCard({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [modificationRequest, setModificationRequest] = useState("");
   const [isModifying, setIsModifying] = useState(false);
+  const router = useRouter();
 
   const portfolioUrl = `/sites/${website.slug}`;
-  const fullUrl = `${
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-  }${portfolioUrl}`;
+  const baseUrl =
+    (process.env.NODE_ENV === "production"
+      ? process.env.NEXT_PUBLIC_BASE_URL
+      : "http://localhost:3000") || "http://localhost:3000";
+  const fullUrl = `${baseUrl}${portfolioUrl}`;
 
   const copyToClipboard = async () => {
     try {
@@ -102,6 +107,31 @@ export function PortfolioCard({
       toast("Portfolio URL copied to clipboard!");
     } catch (error) {
       console.error("Failed to copy:", error);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Check out this portfolio: ${title}`,
+          text: `I created this portfolio with VibeResume, you can check it out here: ${fullUrl}`,
+          url: fullUrl,
+        });
+        toast("Portfolio shared successfully!");
+      } else {
+        toast("Web Share API is not supported in your browser.", {
+          icon: <X className="w-4 h-4" />,
+        });
+      }
+    } catch (error) {
+      // Handle cases where the user cancels the share dialog
+      if ((error as Error).name !== "AbortError") {
+        console.error("Failed to share:", error);
+        toast("Failed to share portfolio", {
+          icon: <X className="w-4 h-4" />,
+        });
+      }
     }
   };
 
@@ -132,13 +162,14 @@ export function PortfolioCard({
       });
       setEditDialogOpen(false);
       onUpdate?.();
+      router.refresh();
     } catch (error) {
       console.error("Update error:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
           : "Failed to update portfolio URL";
-      toast(errorMessage, {
+      toast(`${errorMessage}, also, slug must be unique.`, {
         icon: <X className="w-4 h-4" />,
       });
     } finally {
@@ -162,6 +193,7 @@ export function PortfolioCard({
       });
       setDeleteDialogOpen(false);
       onUpdate?.();
+      router.refresh();
     } catch (error) {
       console.error("Delete error:", error);
       toast("Failed to delete portfolio", {
@@ -256,6 +288,14 @@ export function PortfolioCard({
             title="Copy portfolio URL"
           >
             <Copy className="w-4 h-4" />
+          </ToolTipButton>
+
+          <ToolTipButton
+            onClick={handleShare}
+            className="flex-shrink-0"
+            title="Share portfolio"
+          >
+            <Share2 className="w-4 h-4" />
           </ToolTipButton>
 
           {/* AI Edit Dialog */}
