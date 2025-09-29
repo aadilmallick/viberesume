@@ -13,3 +13,12 @@ export type Website = {
   created_at: string;
   updated_at: string;
 };
+
+export type AIUsage = {
+  id: number;
+  user_id: number;
+  clerk_id: string;
+  usage: number;
+  created_at: string;
+  updated_at: string;
+};

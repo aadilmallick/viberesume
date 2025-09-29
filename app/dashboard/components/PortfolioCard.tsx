@@ -44,6 +44,9 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { AIUsageBlockingStrategy } from "@/dal/payments";
+import { checkAIUsageBlocking } from "@/app/actions/ai-usage-blocking";
+import { PaywallInfo } from "./Paywall";
 
 function ToolTipButton({
   children,
@@ -92,6 +95,8 @@ export function PortfolioCard({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [modificationRequest, setModificationRequest] = useState("");
   const [isModifying, setIsModifying] = useState(false);
+  const [paywallInfo, setPaywallInfo] = useState<string>("");
+  const [paywallOpen, setPaywallOpen] = useState(false);
   const router = useRouter();
 
   const portfolioUrl = `/sites/${website.slug}`;
@@ -204,11 +209,27 @@ export function PortfolioCard({
     }
   };
 
+  function displayPaywallInfo(message: string) {
+    setPaywallInfo(message);
+    setPaywallOpen(true);
+  }
+
   const handleAiModification = async () => {
     if (!modificationRequest.trim()) return;
 
     setIsModifying(true);
     try {
+      const { shouldBlock } = await checkAIUsageBlocking();
+      if (shouldBlock) {
+        setAiEditDialogOpen(false);
+        displayPaywallInfo(
+          "You have reached the AI usage limit for this month."
+        );
+        setIsModifying(false);
+        return;
+      }
+      // const shouldBlock = await blockingStrategy.shouldBlock(website.clerk_id);
+
       const response = await fetch(`/api/websites/${website.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -446,6 +467,11 @@ export function PortfolioCard({
           </Dialog>
         </div>
       </div>
+      <PaywallInfo
+        message={paywallInfo}
+        open={paywallOpen}
+        setOpen={setPaywallOpen}
+      />
     </Card>
   );
 }

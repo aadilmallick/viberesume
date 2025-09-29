@@ -24,23 +24,17 @@ This file tracks progress against the plan in DOCS/agents/PLAN.md. Completed ite
 
 ## 4) AI Integration
 
-- [ ] Define the system prompt and resume → HTML + TailwindCSS generation flow
-- [ ] Implement `POST /api/websites` to call AI and insert `websites` record with a random slug
+- [x] Define the system prompt and resume → HTML + TailwindCSS generation flow
+- [x] Implement `POST /api/websites` to call AI and insert `websites` record with a random slug
 
 ## 5) Dashboard
 
-- [ ] Build `/dashboard` to list user sites with links to `/sites/[slug]`
-- [ ] Add actions: Rename slug (PATCH), Delete site (DELETE), Download code, “Ask AI to change”
+- [x] Build `/dashboard` to list user sites with links to `/sites/[slug]`
+- [x] Add actions: Rename slug (PATCH), Delete site (DELETE), Download code, “Ask AI to change”
 
 ## 6) Public Website Rendering
 
-- [ ] Add `app/sites/[slug]/page.tsx` to fetch `websites.code` and render it safely
-
-## 7) Misc
-
-- [ ] Keep this PROGRESS.md updated as features land
-
----
+- [x] Add `app/sites/[slug]/page.tsx` to fetch `websites.code` and render it safely
 
 Summary of work completed this session:
 

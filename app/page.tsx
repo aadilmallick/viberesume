@@ -16,7 +16,9 @@ import {
   SignedIn,
   SignedOut,
   UserButton,
+  PricingTable,
 } from "@clerk/nextjs";
+import Typewriter from "@/components/custom/Typewriter";
 
 export default function Home() {
   return (
@@ -55,13 +57,22 @@ export default function Home() {
             AI-powered portfolio generator
           </Badge>
           <h1 className="animate-[fade-in-up_0.7s_ease-out] text-balance text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
-            Turn your resume into a beautiful one-page portfolio
+            Turn your resume into a beautiful
+            <Typewriter
+              texts={[" one-page portfolio", " visual story", " brag list"]}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent "
+              speed={80}
+              delayMs={3000}
+            />
+            <span className="animate-caret-blink bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent font-extralight">
+              |
+            </span>
           </h1>
           <p className="mt-4 text-pretty text-base text-muted-foreground sm:text-lg">
             Upload a PDF. We extract your story and craft a clean, responsive
             site with Tailwind, ready to share in seconds.
           </p>
-          <div className="mt-7 flex items-center justify-center gap-3">
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             {/* <Link href="/sign-in">
               <Button size="lg" className="animate-[fade-in_0.8s_ease-out]">
                 Sign in with Google or GitHub
@@ -151,6 +162,10 @@ export default function Home() {
             </Card>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-6 pb-24" id="pricing">
+        <PricingTable newSubscriptionRedirectUrl="/dashboard" />
       </section>
 
       {/* Footer */}

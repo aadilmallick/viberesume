@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Upload, FileText, X, Loader2, FileWarning } from "lucide-react";
 import { toast } from "sonner";
+import { checkAIUsageBlocking } from "@/app/actions/ai-usage-blocking";
+import { checkPortfoliosBlocking } from "@/app/actions/portfolios-blocking";
 
 interface UploadResumeProps {}
 
@@ -12,6 +14,8 @@ export default function UploadResume({}: UploadResumeProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [paywallMessage, setPaywallMessage] = useState("");
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.type === "application/pdf") {
@@ -47,6 +51,17 @@ export default function UploadResume({}: UploadResumeProps) {
 
     setIsGenerating(true);
     try {
+      const { shouldBlock } = await checkPortfoliosBlocking();
+      if (shouldBlock) {
+        setPaywallOpen(true);
+        setPaywallMessage(
+          "You have reached the portfolio limit. Upgrade to pro for more."
+        );
+        // toast("You have reached the AI usage limit for this month.", {
+        //   icon: <X className="w-4 h-4" />,
+        // });
+        // return;
+      }
       const formData = new FormData();
       formData.append("pdf", file);
 

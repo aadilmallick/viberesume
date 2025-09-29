@@ -1,8 +1,9 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { UserButton, SignOutButton } from "@clerk/nextjs";
-import { Settings, LogOut } from "lucide-react";
+import { Settings, LogOut, Crown, Zap, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -13,20 +14,118 @@ import {
 } from "@/components/ui/dialog";
 import { useSidebarStore } from "@/store/sidebarStore";
 import { cn } from "@/lib/utils";
+import { getUserStatus } from "@/app/actions/get-user-status";
 import HamburgerButton from "./HamburgerButton";
+import { PaywallInfo } from "./Paywall";
+
+interface UserStatus {
+  isPro: boolean;
+  aiUsage?: number;
+  status: "pro" | "free" | "error";
+  portfolioCount?: number;
+}
 
 export const DashboardSidebar = () => {
   const { isOpen, closeSidebar, toggleSidebar } = useSidebarStore();
+  const [closedOnLargeScreen, setClosedOnLargeScreen] = useState(false);
+  const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
-  const MobileOverlay = () => (
-    <div
-      className={cn(
-        "fixed inset-0 bg-black/50 z-40 md:hidden",
-        isOpen ? "block" : "hidden"
-      )}
-      onClick={closeSidebar}
-    />
-  );
+  useEffect(() => {
+    setLoading(true);
+    const fetchUserStatus = async () => {
+      try {
+        const status = await getUserStatus();
+        setUserStatus(status);
+      } catch (error) {
+        console.error("Failed to fetch user status:", error);
+      }
+    };
+
+    fetchUserStatus().finally(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  const MobileOverlay = () => {
+    return (
+      <div
+        className={cn(
+          "fixed inset-0 bg-black/50 z-40 md:hidden",
+          isOpen ? "block" : "hidden"
+        )}
+        onClick={closeSidebar}
+      />
+    );
+  };
+
+  const UserStatusDisplay = () => {
+    return (
+      <div className="space-y-4">
+        {userStatus && (
+          <div className="bg-slate-50 rounded-lg p-3 border">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-slate-700">
+                Plan Status
+              </span>
+              {userStatus.isPro ? (
+                <Badge
+                  variant="default"
+                  className="bg-amber-100 text-amber-800 hover:bg-amber-100"
+                >
+                  <Crown className="w-3 h-3 mr-1" />
+                  PRO
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="bg-slate-100 text-slate-600"
+                >
+                  <Zap className="w-3 h-3 mr-1" />
+                  FREE
+                </Badge>
+              )}
+            </div>
+            <div className="space-y-1 p-1">
+              {!userStatus.isPro && userStatus.aiUsage !== undefined && (
+                <p className="text-xs text-slate-500">
+                  AI Usage: {userStatus.aiUsage}/10 this month
+                </p>
+              )}
+              {userStatus.portfolioCount !== undefined && (
+                <p className="text-xs text-slate-500">
+                  Portfolios: {userStatus.portfolioCount}
+                  {!userStatus.isPro ? "/5" : ""}
+                </p>
+              )}
+              {userStatus.isPro && (
+                <p className="text-xs text-slate-500">
+                  Unlimited AI usage & portfolios
+                </p>
+              )}
+            </div>
+            {!userStatus.isPro && (
+              <div className="mt-3">
+                <Button
+                  onClick={() => setPaywallOpen(true)}
+                  size="sm"
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                >
+                  <Crown className="w-3 h-3 mr-1" />
+                  Go Pro
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // if (!isOpen) {
+  //   return null;
+  // }
 
   return (
     <>
@@ -52,10 +151,13 @@ export const DashboardSidebar = () => {
           /> */}
           {/* Main content area */}
           <div className="flex-1 p-6">
-            {/* Navigation items can go here in the future */}
-            <div className="space-y-4">
-              {/* Placeholder for future navigation items */}
-            </div>
+            {loading ? (
+              <div className="flex items-startjustify-center h-full">
+                <Loader2 className="w-4 h-4 animate-spin" />
+              </div>
+            ) : (
+              <UserStatusDisplay />
+            )}
           </div>
 
           {/* Bottom section */}
@@ -105,6 +207,11 @@ export const DashboardSidebar = () => {
           </div>
         </div>
       </aside>
+      <PaywallInfo
+        message="Upgrade to PRO for unlimited AI usage and portfolios!"
+        open={paywallOpen}
+        setOpen={setPaywallOpen}
+      />
     </>
   );
 };

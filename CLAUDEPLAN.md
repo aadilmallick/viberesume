@@ -25,34 +25,34 @@ VibeResume is a NextJS app that lets logged-in users upload their resume in PDF 
 
 - [x] Continue database abstraction layer (@db/CloudDatabase.ts)
 - [x] Implement user management (auto-create user on first login, fallback to auto-creating user if not exists in DB when try to upload PDF)
-- [ ] Create website CRUD operations
-- [ ] Add proper TypeScript types with Zod schemas
+- [x] Create website CRUD operations
+- [x] Add proper TypeScript types with Zod schemas
 
 ### Phase 3: AI Portfolio Generation
 
-- [ ] Create AI service for portfolio generation
-- [ ] Design system prompt for HTML + Tailwind generation
-- [ ] Implement POST /api/websites endpoint
-- [ ] Add slug generation utility (random + custom)
+- [x] Create AI service for portfolio generation
+- [x] Design system prompt for HTML + Tailwind generation
+- [x] Implement POST /api/websites endpoint
+- [x] Add slug generation utility (random + custom)
 
 ### Phase 4: Website Management
 
-- [ ] Build websites list view in dashboard
-- [ ] Add website preview cards with actions
-- [ ] Implement slug renaming functionality
-- [ ] Add website deletion with confirmation
+- [x] Build websites list view in dashboard
+- [x] Add website preview cards with actions
+- [x] Implement slug renaming functionality
+- [x] Add website deletion with confirmation
 - [ ] Add code download feature
 
 ### Phase 5: Public Website Rendering
 
-- [ ] Create /sites/[slug] dynamic route
+- [x] Create /sites/[slug] dynamic route
 - [ ] Implement safe HTML rendering
 - [ ] Add proper SEO meta tags
-- [ ] Handle 404 for invalid slugs
+- [x] Handle 404 for invalid slugs
 
 ### Phase 6: Advanced Features
 
-- [ ] "Ask AI to modify" functionality
+- [x] "Ask AI to modify" functionality
 - [ ] Website analytics/view tracking
 - [ ] Multiple portfolio themes
 - [ ] Bulk operations on websites (bulk delete only)
@@ -61,8 +61,18 @@ VibeResume is a NextJS app that lets logged-in users upload their resume in PDF 
 
 - [ ] Error handling and loading states
 - [ ] Input validation and sanitization
+- [ ] Prevent prompt poisoning or injection
 - [ ] Performance optimization
-- [ ] Production deployment setup
+- [x] Production deployment setup
+
+### Phase 8: payments
+
+- [ ] Add clerk payments (developer will do this)
+- [ ] Add feature flags and logic for clerk payments, implement AI usage database methods in CloudDatabase.
+
+### Phase 9: Advanced AI features
+
+- [ ] Model picker, between gemini, gpt-5, etc.
 
 ## API Routes Structure
 
@@ -99,6 +109,62 @@ CREATE TABLE websites (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS ai_usage (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  clerk_id VARCHAR(255) UNIQUE NOT NULL REFERENCES users(clerk_id) ON DELETE CASCADE,
+  usage INT DEFAULT(0),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+```
+
+### AI usage database methods:
+
+New AI Usage Methods
+
+**Table Creation**:
+
+- createAIUsageTable() - Creates the ai_usage table with your
+  schema
+
+**Basic CRUD Operations**:
+
+- getAIUsageByClerkId(clerkId) - Get usage by Clerk ID
+- getAIUsageByUserId(userId) - Get usage by user ID
+- createAIUsage({user_id, clerk_id}) - Create new usage record
+- getOrCreateAIUsage({user_id, clerk_id}) - Get existing or create
+  new
+
+**Usage Management**:
+
+- incrementAIUsage(clerkId, amount) - Increment usage by amount
+  (default 1)
+- setAIUsage(clerkId, usage) - Set usage to specific value
+- resetAIUsage(clerkId) - Reset usage to 0
+
+**Helper Methods**:
+
+- getUserWithAIUsage(clerkId) - Get user and their AI usage in one
+  call
+- trackAIUsageForUser(clerkId, amount) - Convenient method to
+  track usage (ensures record exists first)
+
+**Usage Examples**:
+
+```ts
+// Track AI usage when user generates a portfolio
+await CloudDatabase.trackAIUsageForUser(clerkId, 1);
+
+// Get user's current usage
+const { user, aiUsage } = await;
+CloudDatabase.getUserWithAIUsage(clerkId);
+console.log(`User ${user.email} has used ${aiUsage.usage} AI 
+operations`);
+
+// Reset usage (e.g., monthly reset)
+await CloudDatabase.resetAIUsage(clerkId);
 ```
 
 ## Component Architecture
@@ -118,18 +184,9 @@ app/
 └── api/                 # API routes
 ```
 
-## Key Dependencies to Install
-
-- `pdf-parse` or `@react-pdf/renderer` for PDF text extraction
-- `zod` for schema validation
-- no, just use crypto.randomUUID()
-- `dompurify` for HTML sanitization (client-side)
-- VercelAI sdk for AI integration
-
 ## Current Status
 
 ✅ Landing page complete
 ✅ Clerk authentication setup
 ✅ Database schema defined
-🔄 **Currently working on**: Dashboard with PDF upload
-⏳ Pending: AI integration and website management
+✅ MVP built

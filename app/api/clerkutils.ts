@@ -1,4 +1,5 @@
-import { createClerkClient } from "@clerk/backend";
+import { createClerkClient, User } from "@clerk/backend";
+import { cache } from "react";
 
 export function verifyEnvironmentVariable(key: string) {
   if (!process.env[key]) {
@@ -17,7 +18,22 @@ const clerk = createClerkClient({
   publishableKey: clerkPublishableKey,
 });
 
-export async function getUserByClerkId(clerkId: string) {
+export const getUserByClerkId = cache(async (clerkId: string) => {
   const user = await clerk.users.getUser(clerkId);
   return user;
-}
+});
+
+export const getEmailAddressFromUser = cache((user: User) => {
+  return (
+    user.primaryEmailAddress?.emailAddress ||
+    user.emailAddresses[0].emailAddress
+  );
+});
+
+export const getEmailAddressFromClerkId = cache(async (clerkId: string) => {
+  const user = await getUserByClerkId(clerkId);
+  if (!user) {
+    throw new Error("User not found, auth error in getEmailAddressFromClerkId");
+  }
+  return getEmailAddressFromUser(user);
+});
