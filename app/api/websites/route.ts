@@ -4,6 +4,10 @@ import { CloudDatabase } from "@/db/CloudDatabase";
 import { generatePortfolioFromPDF } from "@/dal/ai";
 // import { nanoid } from "nanoid";
 import { getUserByClerkId } from "../clerkutils";
+import {
+  AIUsageBlockingStrategy,
+  PortfoliosBlockingStrategy,
+} from "@/dal/payments";
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,6 +46,18 @@ export async function POST(request: NextRequest) {
       clerk_id: clerkId,
       email: userFromClerk.emailAddresses[0].emailAddress,
     });
+    const aiBlockingStrategy = new AIUsageBlockingStrategy();
+    const portfoliosBlockingStrategy = new PortfoliosBlockingStrategy();
+    const [aiShouldBlock, portfoliosShouldBlock] = await Promise.all([
+      aiBlockingStrategy.shouldBlock(clerkId),
+      portfoliosBlockingStrategy.shouldBlock(clerkId),
+    ]);
+    if (aiShouldBlock || portfoliosShouldBlock) {
+      return NextResponse.json(
+        { error: "AI usage or portfolio limit reached" },
+        { status: 400 }
+      );
+    }
 
     // Generate portfolio using AI
     const portfolioResult = await generatePortfolioFromPDF(
@@ -58,6 +74,8 @@ export async function POST(request: NextRequest) {
       slug,
       code: portfolioResult.htmlCode,
     });
+
+    await CloudDatabase.incrementAIUsage(clerkId, 1);
 
     return NextResponse.json({
       success: true,

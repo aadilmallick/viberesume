@@ -7,6 +7,7 @@ import { Upload, FileText, X, Loader2, FileWarning } from "lucide-react";
 import { toast } from "sonner";
 import { checkAIUsageBlocking } from "@/app/actions/ai-usage-blocking";
 import { checkPortfoliosBlocking } from "@/app/actions/portfolios-blocking";
+import { useUserStatusStore } from "@/store/userStatusStore";
 
 interface UploadResumeProps {}
 
@@ -16,6 +17,7 @@ export default function UploadResume({}: UploadResumeProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [paywallMessage, setPaywallMessage] = useState("");
+  const { fetchUserStatus, refetchUserStatus } = useUserStatusStore();
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.type === "application/pdf") {
@@ -75,6 +77,7 @@ export default function UploadResume({}: UploadResumeProps) {
       }
 
       const data = await response.json();
+      await refetchUserStatus();
 
       if (data.success) {
         // Redirect to the generated portfolio or dashboard
