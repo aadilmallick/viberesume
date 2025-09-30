@@ -19,6 +19,7 @@ import {
   PricingTable,
 } from "@clerk/nextjs";
 import Typewriter from "@/components/custom/Typewriter";
+import { YoutubeDialog } from "@/components/custom/YoutubeDialog";
 
 export default function Home() {
   return (
@@ -83,11 +84,7 @@ export default function Home() {
                 Sign in with Google or GitHub
               </Button>
             </SignInButton>
-            <Link href="#how-it-works">
-              <Button size="lg" variant="outline" className="backdrop-blur">
-                See how it works
-              </Button>
-            </Link>
+            <YoutubeDialog />
           </div>
         </div>
 
