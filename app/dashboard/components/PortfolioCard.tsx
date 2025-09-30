@@ -37,6 +37,7 @@ import {
   X,
   Share2,
   Check,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import { Website } from "@/lib/types";
@@ -137,6 +138,36 @@ export function PortfolioCard({
           icon: <X className="w-4 h-4" />,
         });
       }
+    }
+  };
+
+  const handleDownloadCode = () => {
+    try {
+      // Create a Blob from the HTML code
+      const blob = new Blob([website.code], { type: "text/html" });
+      
+      // Create a temporary URL for the blob
+      const url = URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element to trigger download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${website.slug}.html`;
+      
+      // Trigger the download
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast("Portfolio code downloaded successfully!");
+    } catch (error) {
+      console.error("Failed to download:", error);
+      toast("Failed to download portfolio code", {
+        icon: <X className="w-4 h-4" />,
+      });
     }
   };
 
@@ -317,6 +348,14 @@ export function PortfolioCard({
             title="Share portfolio"
           >
             <Share2 className="w-4 h-4" />
+          </ToolTipButton>
+
+          <ToolTipButton
+            onClick={handleDownloadCode}
+            className="flex-shrink-0"
+            title="Download code"
+          >
+            <Download className="w-4 h-4" />
           </ToolTipButton>
 
           {/* AI Edit Dialog */}
