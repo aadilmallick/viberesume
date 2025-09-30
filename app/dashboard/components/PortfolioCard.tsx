@@ -37,6 +37,7 @@ import {
   X,
   Share2,
   Check,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import { Website } from "@/lib/types";
@@ -138,6 +139,21 @@ export function PortfolioCard({
         });
       }
     }
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([website.code], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "portfolio.html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast("Portfolio code downloaded!", {
+      icon: <Download className="w-4 h-4" />,
+    });
   };
 
   const handleUpdateSlug = async () => {
@@ -317,6 +333,14 @@ export function PortfolioCard({
             title="Share portfolio"
           >
             <Share2 className="w-4 h-4" />
+          </ToolTipButton>
+
+          <ToolTipButton
+            onClick={handleDownload}
+            className="flex-shrink-0"
+            title="Download portfolio code"
+          >
+            <Download className="w-4 h-4" />
           </ToolTipButton>
 
           {/* AI Edit Dialog */}
