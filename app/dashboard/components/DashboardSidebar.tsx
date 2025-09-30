@@ -13,40 +13,22 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useSidebarStore } from "@/store/sidebarStore";
+import { useUserStatusStore } from "@/store/userStatusStore";
 import { cn } from "@/lib/utils";
-import { getUserStatus } from "@/app/actions/get-user-status";
 import HamburgerButton from "./HamburgerButton";
 import { PaywallInfo } from "./Paywall";
 
-interface UserStatus {
-  isPro: boolean;
-  aiUsage?: number;
-  status: "pro" | "free" | "error";
-  portfolioCount?: number;
-}
-
 export const DashboardSidebar = () => {
-  const { isOpen, closeSidebar, toggleSidebar } = useSidebarStore();
-  const [closedOnLargeScreen, setClosedOnLargeScreen] = useState(false);
-  const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { isOpen, closeSidebar } = useSidebarStore();
   const [paywallOpen, setPaywallOpen] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    const fetchUserStatus = async () => {
-      try {
-        const status = await getUserStatus();
-        setUserStatus(status);
-      } catch (error) {
-        console.error("Failed to fetch user status:", error);
-      }
-    };
+  const { userStatus, loading, fetchUserStatus } = useUserStatusStore();
 
-    fetchUserStatus().finally(() => {
-      setLoading(false);
-    });
-  }, []);
+  useEffect(() => {
+    if (!userStatus && !loading) {
+      fetchUserStatus();
+    }
+  }, [userStatus, loading, fetchUserStatus]);
 
   const MobileOverlay = () => {
     return (
@@ -163,6 +145,20 @@ export const DashboardSidebar = () => {
           {/* Bottom section */}
           <div className="p-6 border-t border-slate-200">
             <div className="space-y-3">
+              {/* User Button */}
+              <div className="flex items-center gap-4">
+                <UserButton afterSignOutUrl="/" />
+                <span className="text-sm text-slate-500">Account</span>
+              </div>
+              <SignOutButton>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-slate-600"
+                >
+                  <LogOut className="w-4 h-4 mr-3" />
+                  Sign Out
+                </Button>
+              </SignOutButton>
               {/* Settings Dialog */}
               <Dialog>
                 <DialogTrigger asChild>
@@ -188,21 +184,6 @@ export const DashboardSidebar = () => {
                   </div>
                 </DialogContent>
               </Dialog>
-
-              {/* User Button */}
-              <div className="flex items-center justify-between">
-                <UserButton afterSignOutUrl="/" />
-                <span className="text-sm text-slate-500">Account</span>
-              </div>
-              <SignOutButton>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-slate-600"
-                >
-                  <LogOut className="w-4 h-4 mr-3" />
-                  Sign Out
-                </Button>
-              </SignOutButton>
             </div>
           </div>
         </div>
