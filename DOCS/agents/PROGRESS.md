@@ -42,3 +42,11 @@ Summary of work completed this session:
 - Added inline SVG logo and updated favicon.
 - Added animations and soft, neumorphic shadow styling.
 - Integrated Clerk provider and added middleware to protect private routes.
+
+## Latest Update: Download Code Feature
+
+- [x] Added download code button to PortfolioCard component
+- [x] Implemented handleDownloadCode function using Blob API
+- [x] Downloads website HTML code as `.html` file with portfolio slug as filename
+- [x] Added Download icon from lucide-react
+- [x] Follows existing patterns for error handling and user feedback
